@@ -1,6 +1,7 @@
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
-  basePath: "/rupiaai",
+  basePath: process.env.NODE_ENV === "production" ? "/rupiaai" : "",
   images: {
     unoptimized: true,
   },
