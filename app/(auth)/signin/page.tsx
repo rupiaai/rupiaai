@@ -48,7 +48,7 @@ export default function LoginPage() {
       />
       <button type="submit">Log In</button>
       <p>
-        Don't have an account?
+        Don&apos;t have an account?
         <Link href="/signup">SignUp</Link>
       </p>
       {error && <p style={{ color: "red" }}>{error}</p>}
