@@ -1,6 +1,6 @@
 // types.d.ts or global.d.ts
 declare global {
-  var mongoose: {
+  let mongoose: {
     conn: any;
     promise: Promise<any> | null;
   };

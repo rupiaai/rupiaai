@@ -60,6 +60,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
+        token.image = user.image;
+        token.registerMethod = user.registerMethod;
       }
       return token as CustomToken;
     },
@@ -67,7 +69,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.id = (token as CustomToken).id;
       session.user.email = (token as CustomToken).email;
       session.user.name = (token as CustomToken).name;
+      session.user.registerMethod = (token as CustomToken).registerMethod;
+      session.user.image = (token as CustomToken).image;
       return session;
+    },
+    async signIn({ profile }) {
+      try {
+        await dbConnect();
+        const userExists = await userModel.findOne({
+          email: profile?.email,
+        });
+        if (!userExists) {
+          const user = await userModel.create({
+            username: profile?.name,
+            email: profile?.email,
+            image: profile?.picture,
+            registerMethod: "google",
+          });
+        }
+        return true;
+      } catch (error) {
+        console.error(error);
+      }
+
+      return true;
     },
   },
   pages: {
