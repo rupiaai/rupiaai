@@ -1,11 +1,10 @@
 import dbConnect from "@/lib/dbConnect";
-import user from "@/models/user";
+import userModel from "@/models/user";
 import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
   await dbConnect();
   try {
-    // Parse the incoming JSON request body
     const { username, email, password } = await request.json();
 
     if (!username || !email || !password) {
@@ -14,7 +13,8 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    const existingUser = await user.findOne({ email });
+
+    const existingUser = await userModel.findOne({ email });
     if (existingUser) {
       return new Response(JSON.stringify({ message: "User already exists" }), {
         status: 400,
@@ -23,12 +23,15 @@ export async function POST(request: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new user({
+    const newUser = new userModel({
       username,
       email,
       password: hashedPassword,
+      registerMethod: "local",
     });
+
     await newUser.save();
+
     return new Response(
       JSON.stringify({ message: "User created successfully" }),
       { status: 201 }

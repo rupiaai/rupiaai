@@ -1,57 +1,114 @@
 "use client";
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import React from "react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { useSignInForm } from "./data";
+import GoogleButton from "@/components/signin";
 
-export default function LoginPage() {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
-  const router = useRouter();
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    const res = await signIn("credentials", {
-      redirect: false,
-      email: form.email,
-      password: form.password,
-    });
-
-    if (res?.error) {
-      setError("Invalid email or password");
-    } else {
-      router.push("/"); // redirect to homepage
-    }
-  };
+export default function SignInFormDemo() {
+  const { form, handleChange, onSubmit, error, fieldErrors } = useSignInForm();
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Sign In</h2>
-      <input
-        name="email"
-        placeholder="Email"
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="password"
-        type="password"
-        placeholder="Password"
-        onChange={handleChange}
-        required
-      />
-      <button type="submit">Log In</button>
-      <p>
-        Don&apos;t have an account?
-        <Link href="/signup">SignUp</Link>
-      </p>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </form>
+    <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
+      <div className="shadow-input mx-auto w-full max-w-md rounded-none bg-[var(--card)] p-4 md:rounded-2xl md:p-8">
+        <h2 className="text-xl font-bold text-[var(--foreground)]">
+          Welcome Back to Rupia AI
+        </h2>
+        <p className="mt-2 max-w-sm text-sm text-[var(--muted-foreground)]">
+          Please sign in to continue.
+        </p>
+
+        {error && (
+          <p className="mt-4 text-center text-sm text-red-500">{error}</p>
+        )}
+
+        <form className="my-8" onSubmit={onSubmit}>
+          <LabelInputContainer className="mb-4">
+            <Label htmlFor="email" className="text-[var(--foreground)]">
+              Email Address
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              placeholder="you@example.com"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              className="bg-[var(--input)] text-[var(--foreground)] border-[var(--border)] focus:ring-[var(--ring)]"
+            />
+            {fieldErrors.email && (
+              <p className="text-red-600">{fieldErrors.email._errors[0]}</p>
+            )}
+          </LabelInputContainer>
+
+          <LabelInputContainer className="mb-4">
+            <Label htmlFor="password" className="text-[var(--foreground)]">
+              Password
+            </Label>
+            <Input
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+              className="bg-[var(--input)] text-[var(--foreground)] border-[var(--border)] focus:ring-[var(--ring)]"
+            />
+            {fieldErrors.password && (
+              <p className="text-red-600">{fieldErrors.password._errors[0]}</p>
+            )}
+          </LabelInputContainer>
+
+          <button
+            className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]"
+            type="submit"
+          >
+            Sign In &rarr;
+            <BottomGradient />
+          </button>
+
+          <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent" />
+
+          <div className="flex flex-col space-y-4">
+            <GoogleButton page="signin" />
+          </div>
+        </form>
+
+        <p className="mt-4 text-center text-sm text-[var(--muted-foreground)]">
+          Don&apos;t have an account?{" "}
+          <a
+            href="/signup"
+            className="font-medium text-[var(--primary)] hover:underline"
+          >
+            Sign Up
+          </a>
+        </p>
+      </div>
+    </div>
   );
 }
+
+// --- Helper Components ---
+const BottomGradient = () => {
+  return (
+    <>
+      <span className="absolute inset-x-0 -bottom-px block h-px w-full bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent opacity-0 transition duration-500 group-hover/btn:opacity-100" />
+      <span className="absolute inset-x-10 -bottom-px mx-auto block h-px w-1/2 bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent opacity-0 blur-sm transition duration-500 group-hover/btn:opacity-100" />
+    </>
+  );
+};
+
+const LabelInputContainer = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  return (
+    <div className={cn("flex w-full flex-col space-y-2", className)}>
+      {children}
+    </div>
+  );
+};

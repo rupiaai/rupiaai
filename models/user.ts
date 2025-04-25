@@ -1,13 +1,17 @@
-import mongoose, { Schema, Document } from "mongoose";
-// Update the User interface to include cartItems
+import { Schema, models, model, Document } from "mongoose";
+
 export interface User extends Document {
   username: string;
   email: string;
   password: string;
+  registerMethod: string;
+  googleId?: string;
+  image: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-// Updated User schema to include cartItems
-const UserSchema: Schema<User> = new mongoose.Schema({
+const UserSchema: Schema<User> = new Schema({
   username: {
     type: String,
     required: [true, "Username is required"],
@@ -22,12 +26,28 @@ const UserSchema: Schema<User> = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, "Password is required"],
+  },
+  registerMethod: {
+    type: String,
+    enum: ["local", "google"],
+    default: "google",
+  },
+  googleId: {
+    type: String,
+    unique: true,
+  },
+  image: {
+    type: String,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 
-const userModel =
-  (mongoose.models.User as mongoose.Model<User>) ||
-  mongoose.model<User>("User", UserSchema);
-
+const userModel = models.User || model<User>("User", UserSchema);
 export default userModel;

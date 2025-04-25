@@ -7,6 +7,9 @@ if (!MONGODB_URI) {
   throw new Error("Please define the MONGODB_URI environment variable");
 }
 
+// Set mongoose strictQuery to false to avoid warnings from Mongoose v7
+mongoose.set("strictQuery", false);
+
 /**
  * Cached connection for MongoDB.
  */
@@ -22,9 +25,16 @@ async function dbConnect() {
   }
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI!).then((mongoose) => {
-      return mongoose;
-    });
+    cached.promise = mongoose
+      .connect(MONGODB_URI!, {
+        serverSelectionTimeoutMS: 30000,
+        connectTimeoutMS: 30000,
+        dbName: "user",
+      })
+      .catch((error) => {
+        console.error("MongoDB connection error:", error);
+        throw new Error("Failed to connect to MongoDB");
+      });
   }
   cached.conn = await cached.promise;
   return cached.conn;
