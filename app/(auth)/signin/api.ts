@@ -8,11 +8,20 @@ export async function submitSignin(form: { email: string; password: string }) {
       email: form.email,
       password: form.password,
     });
-    if (res.status !== 200) {
-      toast.error(res.message);
+
+    if (!res) {
+      toast.error("An unknown error occurred.");
+      return;
     }
-    toast.success("Signed in successfully");
+
+    if (res.status !== 200) {
+      const errorMessage = res.error || "Something went wrong!";
+      toast.error(errorMessage);
+    } else {
+      toast.success("Signed in successfully");
+    }
   } catch (err) {
     console.error(err);
+    toast.error("An error occurred during sign-in.");
   }
 }
